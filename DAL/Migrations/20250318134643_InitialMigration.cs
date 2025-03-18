@@ -9,7 +9,6 @@ namespace DAL.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Создание таблицы Authors с проверкой
             migrationBuilder.Sql(@"
                 DO $$
                 BEGIN
@@ -26,7 +25,6 @@ namespace DAL.Migrations
                 $$;
             ");
 
-            // Создание таблицы Users с проверкой
             migrationBuilder.Sql(@"
                 DO $$
                 BEGIN
@@ -42,7 +40,6 @@ namespace DAL.Migrations
                 $$;
             ");
 
-            // Создание таблицы Books с проверкой
             migrationBuilder.Sql(@"
                 DO $$
                 BEGIN
@@ -64,7 +61,6 @@ namespace DAL.Migrations
                 $$;
             ");
 
-            // Создание таблицы RefreshTokens с проверкой
             migrationBuilder.Sql(@"
                 DO $$
                 BEGIN
@@ -84,7 +80,6 @@ namespace DAL.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            // Удаление таблиц в обратном порядке без проверок
             migrationBuilder.Sql(@"
                 DO $$
                 BEGIN
