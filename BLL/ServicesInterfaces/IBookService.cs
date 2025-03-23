@@ -10,8 +10,9 @@ namespace BLL.ServicesInterfaces
     public interface IBookService:IService<BookDTO>
     {
         Task AddBookImageAsync(int bookId, byte[] imageData);
-        Task BorrowBookAsync(int bookId);
+        Task BorrowBookAsync(int bookId, int borrowerId);
         Task<BookDTO> GetByISBNAsync(string isbn);
         Task<IEnumerable<BookDTO>> GetBooksByAuthorAsync(int authorId);
+
     }
 }

@@ -46,9 +46,10 @@ namespace BLL.Services
             await _authorRepository.UpdateAsync(author);
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(AuthorDTO authorDto)
         {
-            await _authorRepository.DeleteAsync(id);
+            var author = _mapper.Map<Author>(authorDto);
+            await _authorRepository.DeleteAsync(author);
         }
     }
 }

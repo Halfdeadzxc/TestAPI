@@ -1,55 +1,81 @@
-﻿using BLL.DTO;
-using BLL.ServicesInterfaces;
-using BLL.Validators;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
+using BLL.DTO;
+using BLL.ServicesInterfaces;
 using System.Threading.Tasks;
+using BLL.Services;
+using System.Security.Claims;
 
 namespace WebApplication2.Controllers
 {
-    [Route("api/users")]
     [ApiController]
-    [Authorize]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IValidator<UserDTO> _userValidator;
+        private readonly JwtService _jwtService;
 
-        public UsersController(IUserService userService, IValidator<UserDTO> userValidator)
+        public UsersController(IUserService userService, JwtService jwtService)
         {
             _userService = userService;
-            _userValidator = userValidator;
+            _jwtService = jwtService;
         }
 
-        [HttpGet("profile")]
-        public async Task<IActionResult> GetProfile()
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginDTO loginDto)
         {
-            var username = User.Identity?.Name;
+            var user = await _userService.AuthenticateUserAsync(loginDto.Username, loginDto.Password);
 
-            if (string.IsNullOrEmpty(username))
-                return Unauthorized("User is not authenticated");
-
-            var user = await _userService.GetUserByUsernameAsync(username);
             if (user == null)
-                return NotFound("User not found");
-
-            var validationResults = _userValidator.Validate(user);
-            if (validationResults.Count > 0)
             {
-                return BadRequest(validationResults);
+                return Unauthorized(new { Message = "Invalid credentials" });
+            }
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role)
+            };
+
+            var token = _jwtService.GenerateAccessToken(claims, 60);
+
+            return Ok(new { Token = token });
+        }
+
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] UserDTO userDto)
+        {
+            var user = await _userService.CreateUserAsync(userDto);
+            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+        }
+
+        [Authorize(Policy = "AdminPolicy")] 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(string username)
+        {
+            var user = await _userService.GetUserByUsernameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = $"User with ID {username} not found" });
             }
 
             return Ok(user);
         }
 
-        [HttpGet("admin-data")]
-        [Authorize(Policy = "AdminPolicy")]
-        public IActionResult GetAdminData()
+        [Authorize(Policy = "UserPolicy")] 
+        [HttpGet("ByUsername/{username}")]
+        public async Task<IActionResult> GetByUsername(string username)
         {
-            return Ok("This endpoint is accessible only to Admins!");
+            var user = await _userService.GetUserByUsernameAsync(username);
+
+            if (user == null)
+            {
+                return NotFound(new { Message = $"User with username '{username}' not found" });
+            }
+
+            return Ok(user);
         }
     }
 }

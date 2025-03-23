@@ -13,6 +13,7 @@ namespace DAL.Interfaces
         Task AddRefreshTokenAsync(RefreshToken refreshToken);
         Task<RefreshToken?> GetRefreshTokenAsync(string token);
         Task<User?> GetUserByIdAsync(int id);
+        Task AddUserAsync(User user);
     }
 
 }

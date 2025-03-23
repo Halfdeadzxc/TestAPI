@@ -28,6 +28,11 @@ namespace DAL.AuthRepositories
             _context.RefreshTokens.Add(refreshToken);
             await _context.SaveChangesAsync();
         }
+        public async Task AddUserAsync(User user)
+        {
+            _context.Users.Add(user); 
+            await _context.SaveChangesAsync(); 
+        }
 
         public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
         {

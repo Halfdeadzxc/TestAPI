@@ -14,7 +14,6 @@ namespace WebApplication2
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             // Add services to the container.
             builder.Services.ConfigureBLL(builder.Configuration.GetConnectionString("DefaultConnection")!);
             builder.Services.AddControllers();
@@ -40,9 +39,10 @@ namespace WebApplication2
             });
             builder.Services.AddAuthorization(options =>
             {
-                options.AddPolicy("AdminPolicy", policy =>
-                    policy.RequireRole("Admin"));
+                options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
             });
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>

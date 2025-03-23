@@ -17,5 +17,7 @@ namespace BLL.DTO
         public AuthorDTO Author { get; set; }
         public DateTime BorrowedTime { get; set; }
         public DateTime ReturnTime { get; set; }
+        public int? BorrowerId { get; set; }
+        public UserDTO Borrower { get; set; } 
     }
 }

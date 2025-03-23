@@ -1,31 +1,25 @@
 ﻿using BLL.DTO;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using FluentValidation;
 
 namespace BLL.Validators
 {
-    public class UserDTOValidator:IValidator<UserDTO>
+    public class UserDTOValidator : AbstractValidator<UserDTO>
     {
-        public  List<ValidationResult> Validate(UserDTO user)
+        public UserDTOValidator()
         {
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(user);
+            RuleFor(user => user.Username)
+                .NotEmpty().WithMessage("Username cannot be empty.")
+                .MinimumLength(3).WithMessage("Username must be at least 3 characters long.")
+                .MaximumLength(50).WithMessage("Username cannot exceed 50 characters.");
 
-            Validator.TryValidateObject(user, validationContext, validationResults, true);
+            RuleFor(user => user.PasswordHash)
+                .NotEmpty().WithMessage("PasswordHash cannot be empty.")
+                .MinimumLength(8).WithMessage("PasswordHash must be at least 8 characters long.");
 
-            if (string.IsNullOrWhiteSpace(user.Role))
-            {
-                validationResults.Add(new ValidationResult(
-                    "Role cannot be null, empty, or consist only of white-space characters.",
-                    new[] { nameof(user.Role) }
-                ));
-            }
-
-            return validationResults;
+            RuleFor(user => user.Role)
+                .NotEmpty().WithMessage("Role cannot be empty.")
+                .Must(role => role == "Admin" || role == "User")
+                .WithMessage("Role must be either 'Admin' or 'User'.");
         }
     }
 }

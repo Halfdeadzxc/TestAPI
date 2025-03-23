@@ -1,33 +1,29 @@
 ﻿using BLL.DTO;
-using DAL.Models;
 using FluentValidation;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Validators
 {
-    public class AuthorDTOValidator:IValidator<AuthorDTO>
+    public class AuthorDTOValidator : AbstractValidator<AuthorDTO>
     {
-        public  List<ValidationResult> Validate(AuthorDTO author)
+        public AuthorDTOValidator()
         {
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(author);
+            RuleFor(author => author.FirstName)
+                .NotEmpty().WithMessage("First Name cannot be empty.")
+                .MaximumLength(50).WithMessage("First Name cannot exceed 50 characters.");
 
-            Validator.TryValidateObject(author, validationContext, validationResults, true);
+            RuleFor(author => author.LastName)
+                .NotEmpty().WithMessage("Last Name cannot be empty.")
+                .MaximumLength(50).WithMessage("Last Name cannot exceed 50 characters.");
 
-            if (author.BirthDate > DateTime.Now)
-            {
-                validationResults.Add(new ValidationResult(
-                    "BirthDate cannot be in the future.",
-                    new[] { nameof(author.BirthDate) }
-                ));
-            }
+            RuleFor(author => author.BirthDate)
+                .LessThan(DateTime.Now).WithMessage("Birth Date cannot be in the future.")
+                .GreaterThan(DateTime.Now.AddYears(-150)).WithMessage("Birth Date must be within the last 150 years.");
 
-            return validationResults;
+            RuleFor(author => author.Country)
+                .NotEmpty().WithMessage("Country cannot be empty.")
+                .MaximumLength(50).WithMessage("Country cannot exceed 50 characters.");
         }
     }
 }
+    

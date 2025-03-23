@@ -19,27 +19,45 @@ namespace DAL
                 entity.Property(u => u.PasswordHash).IsRequired();
                 entity.Property(u => u.Role).IsRequired().HasMaxLength(20);
             });
+
             modelBuilder.Entity<RefreshToken>(entity =>
             {
                 entity.HasKey(r => r.Id);
                 entity.Property(r => r.Token).IsRequired();
                 entity.Property(r => r.ExpiryDate).IsRequired();
                 entity.HasOne(r => r.User)
-                      .WithMany() 
+                      .WithMany()
                       .HasForeignKey(r => r.UserId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<Book>()
-                .HasKey(e => e.Id);
 
-            modelBuilder.Entity<Author>()
-                .HasKey(p => p.Id);
+            modelBuilder.Entity<Book>(entity =>
+            {
+                entity.HasKey(b => b.Id);
+                entity.Property(b => b.ISBN)
+                      .IsRequired()
+                      .HasMaxLength(13);
+                entity.Property(b => b.Title).IsRequired();
+                entity.Property(b => b.Genre).IsRequired();
+                entity.Property(b => b.Description).IsRequired();
+                entity.Property(b => b.BorrowedTime).IsRequired();
+                entity.Property(b => b.ReturnTime).IsRequired();
 
-           
-            modelBuilder.Entity<Book>()
-                .HasOne(b => b.Author)
-                .WithMany()
-                .HasForeignKey("AuthorId"); 
+                entity.HasOne(b => b.Author)
+                      .WithMany()
+                      .HasForeignKey(b => b.AuthorId);
+
+                entity.HasOne(b => b.Borrower) 
+                      .WithMany(u => u.BorrowedBooks)
+                      .HasForeignKey(b => b.BorrowerId)
+                      .OnDelete(DeleteBehavior.SetNull); 
+            });
+
+            modelBuilder.Entity<Author>(entity =>
+            {
+                entity.HasKey(a => a.Id);
+            });
+
             base.OnModelCreating(modelBuilder);
         }
 

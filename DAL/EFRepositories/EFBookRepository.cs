@@ -34,25 +34,17 @@
 
             public async Task UpdateAsync(Book book)
             {
-                var existingEvent = Database.Set<Book>().Local.FirstOrDefault(b => b.Id == book.Id);
-
-                if (existingEvent != null)
-                {
-                    Database.Entry(existingEvent).State = EntityState.Detached;
-                }
-
+               
                 Database.Set<Book>().Update(book);
                 await Database.SaveChangesAsync();
             }
 
-            public async Task DeleteAsync(int Id)
+            public async Task DeleteAsync(Book book)
             {
-                var book = await Database.Set<Book>().FindAsync(Id);
-                if (book != null)
-                {
+               
                     Database.Set<Book>().Remove(book);
                     await Database.SaveChangesAsync();
-                }
+                
             }
         public async Task<IEnumerable<Book>> GetBooksByAuthorAsync(int authorId)
         {

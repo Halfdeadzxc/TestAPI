@@ -151,7 +151,7 @@ namespace UnitTests
                 var service = new AuthorService(repository, _mapper);
 
                 
-                await service.DeleteAsync(1);
+                await service.DeleteAsync(new AuthorDTO { Id = 1, FirstName = "John", LastName = "Doe", BirthDate = new DateTime(1970, 1, 1), Country = "USA" });
 
                 
                 var deletedAuthor = context.Authors.FirstOrDefault(a => a.Id == 1);

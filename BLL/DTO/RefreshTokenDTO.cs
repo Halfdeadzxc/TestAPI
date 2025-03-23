@@ -9,6 +9,8 @@ namespace BLL.DTO
     public class RefreshTokenDTO
     {
         public string Token { get; set; }
+        
+        public int UserId { get; set; }
         public DateTime ExpiryDate { get; set; }
     }
 }

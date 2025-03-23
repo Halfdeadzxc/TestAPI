@@ -6,6 +6,7 @@ using BLL.ServicesInterfaces;
 using BLL.DTO;
 using BLL.Services;
 using BLL.Validators;
+using FluentValidation;
 namespace BLL
 {
     public static class ConfigurationExtensions
@@ -27,6 +28,8 @@ namespace BLL
                 .AddScoped<IUserService, UserService>();
             services
                 .AddScoped<JwtService>();
+            services.
+                AddScoped<PasswordService>();
             services
                 .AddTransient<IValidator<BookDTO>, BookDTOValidator>();
             services

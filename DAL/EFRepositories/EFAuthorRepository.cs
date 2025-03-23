@@ -36,25 +36,14 @@ namespace DAL.EFRepositories
 
         public async Task UpdateAsync(Author author)
         {
-            var existingEvent = Database.Set<Author>().Local.FirstOrDefault(b => b.Id == author.Id);
-
-            if (existingEvent != null)
-            {
-                Database.Entry(existingEvent).State = EntityState.Detached; 
-            }
-
             Database.Set<Author>().Update(author);
             await Database.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Author author)
         {
-            var author = await Database.Set<Author>().FindAsync(id);
-            if (author != null)
-            {
-                Database.Set<Author>().Remove(author);
-                await Database.SaveChangesAsync();
-            }
+            Database.Set<Author>().Remove(author);
+            await Database.SaveChangesAsync();
         }
     }
 }

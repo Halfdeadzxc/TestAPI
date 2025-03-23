@@ -1,39 +1,19 @@
 ﻿using BLL.DTO;
+using FluentValidation;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Validators
 {
-    public class RefreshTokenDTOValidator:IValidator<RefreshTokenDTO>
+    public class RefreshTokenDTOValidator : AbstractValidator<RefreshTokenDTO>
     {
-        public List<ValidationResult> Validate(RefreshTokenDTO refreshToken)
+        public RefreshTokenDTOValidator()
         {
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(refreshToken);
+            RuleFor(refreshToken => refreshToken.Token)
+                .NotEmpty().WithMessage("Token cannot be null, empty, or whitespace.")
+                .NotNull().WithMessage("Token cannot be null.");
 
-            Validator.TryValidateObject(refreshToken, validationContext, validationResults, true);
-
-            if (string.IsNullOrWhiteSpace(refreshToken.Token))
-            {
-                validationResults.Add(new ValidationResult(
-                    "Token cannot be null, empty, or whitespace.",
-                    new[] { nameof(refreshToken.Token) }
-                ));
-            }
-
-            if (refreshToken.ExpiryDate < DateTime.Now)
-            {
-                validationResults.Add(new ValidationResult(
-                    "ExpiryDate cannot be in the past.",
-                    new[] { nameof(refreshToken.ExpiryDate) }
-                ));
-            }
-
-            return validationResults;
+            RuleFor(refreshToken => refreshToken.ExpiryDate)
+                .GreaterThan(DateTime.Now).WithMessage("ExpiryDate cannot be in the past.");
         }
     }
 }

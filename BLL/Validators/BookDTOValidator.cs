@@ -1,31 +1,39 @@
 ﻿using BLL.DTO;
+using FluentValidation;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BLL.Validators
 {
-    public class BookDTOValidator :IValidator<BookDTO>
+    public class BookDTOValidator : AbstractValidator<BookDTO>
     {
-        public  List<ValidationResult> Validate(BookDTO book)
+        public BookDTOValidator()
         {
-            var validationResults = new List<ValidationResult>();
-            var validationContext = new ValidationContext(book);
+            RuleFor(book => book.ISBN)
+                .NotEmpty().WithMessage("ISBN cannot be empty.")
+                .Length(10, 13).WithMessage("ISBN must be either 10 or 13 characters long.")
+                .Matches(@"^\d{10}(\d{3})?$").WithMessage("ISBN must contain only digits.");
 
-            Validator.TryValidateObject(book, validationContext, validationResults, true);
+            RuleFor(book => book.Title)
+                .NotEmpty().WithMessage("Title cannot be empty.")
+                .MaximumLength(100).WithMessage("Title cannot exceed 100 characters.");
 
-            if (book.BorrowedTime > book.ReturnTime)
-            {   
-                validationResults.Add(new ValidationResult(
-                    "BorrowedTime must be earlier than ReturnTime.",
-                    new[] { nameof(book.BorrowedTime), nameof(book.ReturnTime) }
-                ));
-            }
+            RuleFor(book => book.Genre)
+                .NotEmpty().WithMessage("Genre cannot be empty.")
+                .MaximumLength(50).WithMessage("Genre cannot exceed 50 characters.");
 
-            return validationResults;
+            RuleFor(book => book.Description)
+                .NotEmpty().WithMessage("Description cannot be empty.")
+                .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
+
+            RuleFor(book => book.AuthorId)
+                .GreaterThan(0).WithMessage("AuthorId must be greater than 0.");
+
+            RuleFor(book => book)
+                .Must(book => book.BorrowedTime <= book.ReturnTime)
+                .WithMessage("BorrowedTime must be earlier than or equal to ReturnTime.");
+
+            RuleFor(book => book.BorrowedTime)
+                .LessThanOrEqualTo(DateTime.Now).WithMessage("BorrowedTime cannot be in the future.");
         }
     }
 }
