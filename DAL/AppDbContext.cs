@@ -48,7 +48,7 @@ namespace DAL
                       .HasForeignKey(b => b.AuthorId);
 
                 entity.HasOne(b => b.Borrower) 
-                      .WithMany(u => u.BorrowedBooks)
+                      .WithMany()
                       .HasForeignKey(b => b.BorrowerId)
                       .OnDelete(DeleteBehavior.SetNull); 
             });

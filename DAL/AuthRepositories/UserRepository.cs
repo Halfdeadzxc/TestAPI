@@ -18,29 +18,44 @@ namespace DAL.AuthRepositories
             _context = context;
         }
 
-        public async Task<User?> GetUserByUsernameAsync(string username)
+        public async Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
         }
 
-        public async Task AddRefreshTokenAsync(RefreshToken refreshToken)
+        public async Task<User?> GetUserByIdAsync(int id, CancellationToken cancellationToken)
         {
-            _context.RefreshTokens.Add(refreshToken);
-            await _context.SaveChangesAsync();
-        }
-        public async Task AddUserAsync(User user)
-        {
-            _context.Users.Add(user); 
-            await _context.SaveChangesAsync(); 
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
 
-        public async Task<RefreshToken?> GetRefreshTokenAsync(string token)
+        public async Task AddUserAsync(User user, CancellationToken cancellationToken)
         {
-            return await _context.RefreshTokens.FirstOrDefaultAsync(r => r.Token == token);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await _context.Users.AddAsync(user, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
-        public async Task<User?> GetUserByIdAsync(int id)
+
+        public async Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken)
         {
-            return await _context.Users.FindAsync(id);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return await _context.RefreshTokens
+                .FirstOrDefaultAsync(rt => rt.Token == token, cancellationToken);
+        }
+
+        public async Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await _context.RefreshTokens.AddAsync(refreshToken, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
 

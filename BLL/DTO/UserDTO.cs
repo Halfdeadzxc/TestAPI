@@ -13,6 +13,5 @@ namespace BLL.DTO
         public string PasswordHash { get; set; }
 
         public string Role { get; set; }
-        public ICollection<BookDTO> BorrowedBooks { get; set; } 
     }
 }

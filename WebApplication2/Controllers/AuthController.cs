@@ -1,106 +1,48 @@
-﻿//using BLL.DTO;
-//using BLL.Services;
-//using BLL.ServicesInterfaces;
-//using BLL.Validators;
-//using Microsoft.AspNetCore.Mvc;
-//using System.Security.Claims;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using BLL.DTO;
+using BLL.ServicesInterfaces;
+using System.Threading.Tasks;
+using BLL.Services;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity.Data;
 
-//namespace WebApplication2.Controllers
-//{
-//    [Route("api/auth")]
-//    [ApiController]
-//    public class AuthController : ControllerBase
-//    {
-//        private readonly IUserService _userService;
-//        private readonly JwtService _jwtService;
-//        private readonly IValidator<RefreshTokenDTO> _refreshTokenValidator;
-//        private readonly IValidator<UserDTO> _userValidator;
+namespace WebApplication2.Controllers
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
+    {
+        private readonly IUserService _userService;
 
-//        public AuthController(
-//            IUserService userService,
-//            JwtService jwtService,
-//            IValidator<RefreshTokenDTO> refreshTokenValidator,
-//            IValidator<UserDTO> userValidator)
-//        {
-//            _userService = userService;
-//            _jwtService = jwtService;
-//            _refreshTokenValidator = refreshTokenValidator;
-//            _userValidator = userValidator;
-//        }
+        public AuthController(IUserService userService)
+        {
+            _userService = userService;
+        }
 
-//        [HttpPost("login")]
-//        public async Task<IActionResult> Login([FromBody] LoginModel model)
-//        {
-//            if (string.IsNullOrWhiteSpace(model.Username) || string.IsNullOrWhiteSpace(model.Password))
-//            {
-//                return BadRequest("Username and Password cannot be empty.");
-//            }
+        [AllowAnonymous]
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO loginRequest, CancellationToken cancellationToken)
+        {
+            var tokens = await _userService.AuthenticateAsync(loginRequest.Username, loginRequest.Password, cancellationToken);
+            return Ok(tokens);
+        }
 
-//            var user = new UserDTO { Username = model.Username, Role = "User" }; 
-//            var userValidationResults = _userValidator.Validate(user);
-//            if (userValidationResults.Count > 0)
-//            {
-//                return BadRequest(userValidationResults);
-//            }
+        [AllowAnonymous]
+        [HttpPost("Refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest refreshRequest, CancellationToken cancellationToken)
+        {
+            var newAccessToken = await _userService.RefreshAccessTokenAsync(refreshRequest.RefreshToken, cancellationToken);
+            return Ok(new { AccessToken = newAccessToken });
+        }
+        [AllowAnonymous]
+        [HttpPost("Register")]
+        public async Task<IActionResult> Register([FromBody] UserDTO userDto, CancellationToken cancellationToken)
+        {
+            var user = await _userService.CreateUserAsync(userDto, cancellationToken);
+            return CreatedAtAction(nameof(Register), new { username = user.Username }, user);
+        }
 
-//            var authenticatedUser = await _userService.AuthenticateUserAsync(model.Username, model.Password);
-//            if (authenticatedUser == null)
-//            {
-//                return Unauthorized("Invalid username or password.");
-//            }
+    }
 
-//            var claims = new List<Claim>
-//            {
-//                new Claim(ClaimTypes.Name, authenticatedUser.Username),
-//                new Claim(ClaimTypes.Role, authenticatedUser.Role)
-//            };
-//            var accessToken = _jwtService.GenerateAccessToken(claims, 15);
-
-           
-//            var refreshToken = await _userService.GenerateRefreshTokenAsync(authenticatedUser.Id);
-
-//            return Ok(new { AccessToken = accessToken, RefreshToken = refreshToken.Token });
-//        }
-
-//        [HttpPost("refresh")]
-//        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO model)
-//        {
-            
-//            var refreshTokenValidationResults = _refreshTokenValidator.Validate(model);
-//            if (refreshTokenValidationResults.Count > 0)
-//            {
-//                return BadRequest(refreshTokenValidationResults);
-//            }
-
-           
-//            var isValid = await _userService.ValidateRefreshTokenAsync(model.Token);
-//            if (!isValid)
-//            {
-//                return Unauthorized("Invalid or expired refresh token.");
-//            }
-
-           
-//            var user = await _userService.GetUserByRefreshTokenAsync(model.Token);
-//            if (user == null)
-//            {
-//                return Unauthorized("Invalid user.");
-//            }
-
-           
-//            var claims = new List<Claim>
-//            {
-//                new Claim(ClaimTypes.Name, user.Username),
-//                new Claim(ClaimTypes.Role, user.Role)
-//            };
-//            var accessToken = _jwtService.GenerateAccessToken(claims, 15);
-
-//            return Ok(new { AccessToken = accessToken });
-//        }
-//    }
-
-//    public class LoginModel
-//    {
-//        public string Username { get; set; }
-//        public string Password { get; set; }
-//    }
-//}
+}

@@ -9,11 +9,11 @@ namespace DAL.Interfaces
 {
     public interface IUserRepository
     {
-        Task<User?> GetUserByUsernameAsync(string username);
-        Task AddRefreshTokenAsync(RefreshToken refreshToken);
-        Task<RefreshToken?> GetRefreshTokenAsync(string token);
-        Task<User?> GetUserByIdAsync(int id);
-        Task AddUserAsync(User user);
+        Task<User?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken);
+        Task<User?> GetUserByIdAsync(int id, CancellationToken cancellationToken);
+        Task AddUserAsync(User user, CancellationToken cancellationToken);
+        Task<RefreshToken?> GetRefreshTokenAsync(string token, CancellationToken cancellationToken);
+        Task AddRefreshTokenAsync(RefreshToken refreshToken, CancellationToken cancellationToken);
     }
 
 }

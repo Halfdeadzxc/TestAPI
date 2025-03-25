@@ -1,83 +1,46 @@
-﻿using BLL.DTO;
-using FluentValidation;
+﻿using DAL.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
-using System.Threading;
 
-namespace BLL.Services
+public class JwtService
 {
-    public class JwtService
+    private readonly string _secretKey;
+    private readonly string _issuer;
+    private readonly string _audience;
+
+    public JwtService(IConfiguration configuration)
     {
-        private readonly string _secretKey;
-        private readonly string _issuer;
-        private readonly string _audience;
-        private readonly IValidator<RefreshTokenDTO> _refreshTokenValidator;
+        _secretKey = configuration["Jwt:SecretKey"];
+        _issuer = configuration["Jwt:Issuer"];
+        _audience = configuration["Jwt:Audience"];
+    }
 
-        public JwtService(IConfiguration configuration, IValidator<RefreshTokenDTO> refreshTokenValidator)
+    public string GenerateAccessToken(IEnumerable<Claim> claims, int lifetimeMinutes)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: _issuer,
+            audience: _audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(lifetimeMinutes),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public RefreshToken GenerateRefreshToken(int userId, CancellationToken cancellationToken)
+    {
+        return new RefreshToken
         {
-            _secretKey = configuration["Jwt:SecretKey"];
-            _issuer = configuration["Jwt:Issuer"];
-            _audience = configuration["Jwt:Audience"];
-            _refreshTokenValidator = refreshTokenValidator;
-        }
-
-        public string GenerateAccessToken(IEnumerable<System.Security.Claims.Claim> claims, int lifetimeMinutes, CancellationToken cancellationToken = default)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(
-                issuer: _issuer,
-                audience: _audience,
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(lifetimeMinutes),
-                signingCredentials: creds
-            );
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public RefreshTokenDTO GenerateRefreshToken(int userId, CancellationToken cancellationToken = default)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var refreshToken = new RefreshTokenDTO
-            {
-                Token = Guid.NewGuid().ToString(),
-                ExpiryDate = DateTime.UtcNow.AddDays(1)
-            };
-
-            var validationResult = _refreshTokenValidator.Validate(refreshToken);
-            if (!validationResult.IsValid)
-            {
-                var errors = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new ArgumentException($"Validation failed: {errors}");
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return refreshToken;
-        }
-
-        public bool IsRefreshTokenValid(RefreshTokenDTO refreshToken, CancellationToken cancellationToken = default)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var validationResult = _refreshTokenValidator.Validate(refreshToken);
-            if (!validationResult.IsValid)
-            {
-                return false;
-            }
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return refreshToken.ExpiryDate > DateTime.UtcNow;
-        }
+            Token = Guid.NewGuid().ToString(),
+            UserId = userId,
+            ExpiryDate = DateTime.UtcNow.AddDays(7) 
+        };
     }
 }

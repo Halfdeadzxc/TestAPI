@@ -163,7 +163,7 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.HasOne("DAL.Models.User", "Borrower")
-                        .WithMany("BorrowedBooks")
+                        .WithMany()
                         .HasForeignKey("BorrowerId")
                         .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
@@ -182,11 +182,6 @@ namespace DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("DAL.Models.User", b =>
-                {
-                    b.Navigation("BorrowedBooks");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using BLL.DTO;
 using BLL.ServicesInterfaces;
 using System.Collections.Generic;
@@ -18,20 +19,23 @@ namespace WebApplication2.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             var authors = await _authorService.GetAllAsync();
-            return Ok(authors); 
+            return Ok(authors);
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetById(int id)
         {
             var author = await _authorService.GetByIdAsync(id);
-            return Ok(author); 
+            return Ok(author);
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Add([FromBody] AuthorDTO authorDto)
         {
             await _authorService.AddAsync(authorDto);
@@ -39,17 +43,19 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Policy = "AdminPolicy")] 
         public async Task<IActionResult> Update([FromBody] AuthorDTO authorDto)
         {
             await _authorService.UpdateAsync(authorDto);
-            return NoContent(); 
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> Delete([FromBody] AuthorDTO authorDto)
         {
             await _authorService.DeleteAsync(authorDto);
-            return NoContent(); 
+            return NoContent();
         }
     }
 }

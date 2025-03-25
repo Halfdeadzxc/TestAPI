@@ -6,16 +6,9 @@ namespace BLL.ServicesInterfaces
 {
     public interface IUserService
     {
-        Task<UserDTO?> AuthenticateUserAsync(string username, string password, CancellationToken cancellationToken = default);
+        Task<TokenResponseDTO> AuthenticateAsync(string username, string password, CancellationToken cancellationToken);
 
-        Task<RefreshTokenDTO> GenerateRefreshTokenAsync(int userId, CancellationToken cancellationToken = default);
-
-        Task<bool> ValidateRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
-
-        Task<UserDTO?> GetUserByRefreshTokenAsync(string token, CancellationToken cancellationToken = default);
-
-        Task<UserDTO?> GetUserByUsernameAsync(string username, CancellationToken cancellationToken = default);
-
-        Task<UserDTO> CreateUserAsync(UserDTO userDto, CancellationToken cancellationToken = default);
+        Task<string> RefreshAccessTokenAsync(string refreshToken, CancellationToken cancellationToken);
+        Task<UserDTO> CreateUserAsync(UserDTO userDto, CancellationToken cancellationToken);
     }
 }

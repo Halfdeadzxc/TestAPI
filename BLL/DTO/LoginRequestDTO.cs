@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace BLL.DTO
 {
-    public class LoginDTO
+    public class LoginRequestDTO
     {
         public string Username { get; set; }
         public string Password { get; set; }
     }
+
 }
