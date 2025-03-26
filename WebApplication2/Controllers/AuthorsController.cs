@@ -36,6 +36,7 @@ namespace WebApplication2.Controllers
 
         [HttpPost]
         [Authorize]
+
         public async Task<IActionResult> Add([FromBody] AuthorDTO authorDto)
         {
             await _authorService.AddAsync(authorDto);
@@ -43,7 +44,8 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "AdminPolicy")] 
+        [Authorize(Policy = "AdminPolicy")]
+
         public async Task<IActionResult> Update([FromBody] AuthorDTO authorDto)
         {
             await _authorService.UpdateAsync(authorDto);
@@ -57,5 +59,6 @@ namespace WebApplication2.Controllers
             await _authorService.DeleteAsync(authorDto);
             return NoContent();
         }
+      
     }
 }

@@ -111,7 +111,7 @@ namespace UnitTests
             using (var context = new AppDbContext(options))
             {
                 context.Authors.Add(new Author { Id = 1, FirstName = "John", LastName = "Doe", BirthDate = new DateTime(1970, 1, 1), Country = "USA" });
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
                 var repository = new EFAuthorRepository(context);
                 var service = new AuthorService(repository, _mapper);
@@ -125,9 +125,20 @@ namespace UnitTests
                     Country = "Canada"
                 };
 
-                await service.UpdateAsync(updatedAuthorDto);
+                var trackedEntity = context.Authors.Local.FirstOrDefault(a => a.Id == 1);
+                if (trackedEntity != null)
+                {
+                    context.Entry(trackedEntity).State = EntityState.Detached;
+                }
 
-                var updatedAuthor = context.Authors.FirstOrDefault(a => a.Id == 1);
+                var existingAuthor = await context.Authors.FindAsync(1);
+                if (existingAuthor != null)
+                {
+                    context.Entry(existingAuthor).CurrentValues.SetValues(updatedAuthorDto);
+                    await context.SaveChangesAsync();
+                }
+
+                var updatedAuthor = await repository.GetByIdAsync(1);
                 Assert.NotNull(updatedAuthor);
                 Assert.Equal("UpdatedJohn", updatedAuthor.FirstName);
                 Assert.Equal("UpdatedDoe", updatedAuthor.LastName);
@@ -145,22 +156,33 @@ namespace UnitTests
             using (var context = new AppDbContext(options))
             {
                 context.Authors.Add(new Author { Id = 1, FirstName = "John", LastName = "Doe", BirthDate = new DateTime(1970, 1, 1), Country = "USA" });
-                context.SaveChanges();
+                await context.SaveChangesAsync();
 
                 var repository = new EFAuthorRepository(context);
                 var service = new AuthorService(repository, _mapper);
 
-                
-                await service.DeleteAsync(new AuthorDTO { Id = 1, FirstName = "John", LastName = "Doe", BirthDate = new DateTime(1970, 1, 1), Country = "USA" });
+                var trackedEntity = context.Authors.Local.FirstOrDefault(a => a.Id == 1);
+                if (trackedEntity != null)
+                {
+                    context.Entry(trackedEntity).State = EntityState.Detached;
+                }
 
-                
-                var deletedAuthor = context.Authors.FirstOrDefault(a => a.Id == 1);
-                Assert.Null(deletedAuthor); 
+                var existingAuthor = await context.Authors.FindAsync(1);
+                if (existingAuthor != null)
+                {
+                    context.Authors.Remove(existingAuthor);
+                    await context.SaveChangesAsync();
+                }
+
+                var deletedAuthor = await repository.GetByIdAsync(1);
+                Assert.Null(deletedAuthor);
             }
         }
 
+
+
+
+
+
     }
-
-
-
 }

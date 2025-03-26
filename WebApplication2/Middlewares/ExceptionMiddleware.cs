@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using Microsoft.AspNetCore.Http;
+using System.Net;
+using System.Net.Mime;
 using System.Text.Json;
 
 namespace WebApplication2.Middlewares
@@ -20,53 +22,67 @@ namespace WebApplication2.Middlewares
 
                 if (context.Response.StatusCode < 200 || context.Response.StatusCode >= 300)
                 {
-                    await HandleNonSuccessAsync(context);
+                    await HandleNonSuccessResponseAsync(context);
                 }
             }
             catch (Exception ex)
             {
-                await HandleExceptionAsync(context, ex);
+                await HandleCustomExceptionResponseAsync(context, ex);
             }
         }
 
-        private Task HandleExceptionAsync(HttpContext context, Exception exception)
+        private async Task HandleCustomExceptionResponseAsync(HttpContext context, Exception ex)
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.ContentType = MediaTypeNames.Application.Json;
+
+            context.Response.StatusCode = ex switch
+            {
+                ArgumentException or ArgumentNullException => (int)HttpStatusCode.BadRequest,
+                KeyNotFoundException => (int)HttpStatusCode.NotFound,
+                UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
+                InvalidOperationException => (int)HttpStatusCode.BadRequest,
+                NotImplementedException => (int)HttpStatusCode.NotImplemented,
+                _ => (int)HttpStatusCode.InternalServerError
+            };
 
             var response = new
             {
                 StatusCode = context.Response.StatusCode,
-                Message = "An unexpected error occurred. Please try again later.",
-                Detailed = exception.Message 
+                Message = GetMessageForStatusCode(context.Response.StatusCode),
+                Detailed = ex.Message
             };
 
-            var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(response, options);
 
-            return context.Response.WriteAsync(jsonResponse);
+            await context.Response.WriteAsync(json);
         }
 
-        private Task HandleNonSuccessAsync(HttpContext context)
+        private async Task HandleNonSuccessResponseAsync(HttpContext context)
         {
-            context.Response.ContentType = "application/json";
+            context.Response.ContentType = MediaTypeNames.Application.Json;
 
             var response = new
             {
                 StatusCode = context.Response.StatusCode,
-                Message = $"Request failed with status code {context.Response.StatusCode}."
+                Message = GetMessageForStatusCode(context.Response.StatusCode)
             };
 
-            var jsonResponse = JsonSerializer.Serialize(response, new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                WriteIndented = true
-            });
+            var options = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+            var json = JsonSerializer.Serialize(response, options);
 
-            return context.Response.WriteAsync(jsonResponse);
+            await context.Response.WriteAsync(json);
         }
+
+        private string GetMessageForStatusCode(int statusCode) => statusCode switch
+        {
+            400 => "Bad Request - The request was invalid or cannot be served.",
+            401 => "Unauthorized - Authentication is required and has failed or has not been provided.",
+            403 => "Forbidden - The request was valid, but the server is refusing action.",
+            404 => "Not Found - The requested resource could not be found.",
+            500 => "Internal Server Error - An unexpected condition was encountered.",
+            501 => "Not Implemented - The server does not support the functionality required.",
+            _ => $"Request failed with status code {statusCode}."
+        };
     }
 }

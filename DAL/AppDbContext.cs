@@ -40,8 +40,10 @@ namespace DAL
                 entity.Property(b => b.Title).IsRequired();
                 entity.Property(b => b.Genre).IsRequired();
                 entity.Property(b => b.Description).IsRequired();
-                entity.Property(b => b.BorrowedTime).IsRequired();
-                entity.Property(b => b.ReturnTime).IsRequired();
+                entity.Property(b => b.BorrowedTime).IsRequired()
+                      .HasColumnType("timestamp");
+                entity.Property(b => b.ReturnTime).IsRequired()
+                      .HasColumnType("timestamp");
 
                 entity.HasOne(b => b.Author)
                       .WithMany()
@@ -56,8 +58,16 @@ namespace DAL
             modelBuilder.Entity<Author>(entity =>
             {
                 entity.HasKey(a => a.Id);
+                entity.Property(a => a.Country).IsRequired();
+                entity.Property(a => a.FirstName).IsRequired()
+                      .HasMaxLength(100);
+                entity.Property(a => a.LastName).IsRequired()
+                      .HasMaxLength(100);
+                entity.Property(a => a.BirthDate).IsRequired()
+                      .HasColumnType("date");
+                
             });
-
+            
             base.OnModelCreating(modelBuilder);
         }
 

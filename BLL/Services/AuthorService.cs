@@ -42,12 +42,22 @@ namespace BLL.Services
 
         public async Task UpdateAsync(AuthorDTO authorDto)
         {
+            var existingAuthor = await _authorRepository.GetByIdAsync(authorDto.Id);
+            if (existingAuthor == null)
+            {
+                throw new ArgumentException($"Author with Id {authorDto.Id} does not exist.");
+            }
             var author = _mapper.Map<Author>(authorDto);
             await _authorRepository.UpdateAsync(author);
         }
 
         public async Task DeleteAsync(AuthorDTO authorDto)
         {
+            var existingAuthor = await _authorRepository.GetByIdAsync(authorDto.Id);
+            if (existingAuthor == null)
+            {
+                throw new ArgumentException($"Author with Id {authorDto.Id} does not exist.");
+            }
             var author = _mapper.Map<Author>(authorDto);
             await _authorRepository.DeleteAsync(author);
         }

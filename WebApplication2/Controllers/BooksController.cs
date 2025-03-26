@@ -53,9 +53,9 @@ namespace WebApplication2.Controllers
         }
 
         [HttpPost("Borrow/{bookId}/{borrowerId}")]
-        public async Task<IActionResult> BorrowBook(int bookId, int borrowerId)
+        public async Task<IActionResult> BorrowBook(int bookId, int borrowerId, CancellationToken cancellationToken)
         {
-            await _bookService.BorrowBookAsync(bookId, borrowerId);
+            await _bookService.BorrowBookAsync(bookId, borrowerId, cancellationToken);
             return NoContent(); 
         }
     }
