@@ -9,7 +9,7 @@ namespace DAL.Interfaces
 {
     public interface IBookRepository : IRepository<Book>
     {
-        Task<Book> GetByISBNAsync(string isbn);
-        Task<IEnumerable<Book>> GetBooksByAuthorAsync(int authorId);
+        Task<Book> GetByISBNAsync(string isbn, CancellationToken cancellationToken);
+        Task<IEnumerable<Book>> GetBooksByAuthorAsync(int authorId, CancellationToken cancellationToken);
     }
 }

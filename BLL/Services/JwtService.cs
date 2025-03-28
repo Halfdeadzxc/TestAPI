@@ -18,7 +18,7 @@ public class JwtService
         _audience = configuration["Jwt:Audience"];
     }
 
-    public string GenerateAccessToken(IEnumerable<Claim> claims, int lifetimeMinutes)
+    public string GenerateAccessToken(IEnumerable<Claim> claims, int lifetimeMinutes, CancellationToken cancellationToken)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);

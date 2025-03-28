@@ -18,29 +18,29 @@ namespace DAL.EFRepositories
             Database = Db;
         }
 
-        public async Task<IEnumerable<Author>> GetAllAsync()
+        public async Task<IEnumerable<Author>> GetAllAsync(CancellationToken cancellationToken)
         {
             return await Database.Set<Author>().ToListAsync();
         }
 
-        public async Task<Author> GetByIdAsync(int id)
+        public async Task<Author> GetByIdAsync(int id, CancellationToken cancellationToken)
         {
             return await Database.Set<Author>().FindAsync(id);
         }
 
-        public async Task AddAsync(Author author)
+        public async Task AddAsync(Author author, CancellationToken cancellationToken)
         {
             await Database.Set<Author>().AddAsync(author);
             await Database.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Author author)
+        public async Task UpdateAsync(Author author, CancellationToken cancellationToken)
         {
             Database.Set<Author>().Update(author);
             await Database.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(Author author)
+        public async Task DeleteAsync(Author author, CancellationToken cancellationToken)
         {
             Database.Set<Author>().Remove(author);
             await Database.SaveChangesAsync();

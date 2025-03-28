@@ -12,41 +12,41 @@
             public AppDbContext Database { get; set; }
             public EFBookRepository(AppDbContext db) { Database = db; }
 
-            public async Task<Book> GetByIdAsync(int Id)
+            public async Task<Book> GetByIdAsync(int Id, CancellationToken cancellationToken)
             {
                 return await Database.Set<Book>().FindAsync(Id);
             }
 
-            public async Task<IEnumerable<Book>> GetAllAsync()
+            public async Task<IEnumerable<Book>> GetAllAsync(CancellationToken cancellationToken)
             {
                 return await Database.Set<Book>().ToListAsync();
             }
 
-            public async Task AddAsync(Book book)
+            public async Task AddAsync(Book book, CancellationToken cancellationToken)
             {
                 await Database.Set<Book>().AddAsync(book);
                 await Database.SaveChangesAsync();
             }
-            public async Task<Book> GetByISBNAsync(string isbn)
+            public async Task<Book> GetByISBNAsync(string isbn, CancellationToken cancellationToken)
             {
                 return await Database.Set<Book>().FirstOrDefaultAsync(b => b.ISBN == isbn);
             }
 
-            public async Task UpdateAsync(Book book)
+            public async Task UpdateAsync(Book book, CancellationToken cancellationToken)
             {
                
                 Database.Set<Book>().Update(book);
                 await Database.SaveChangesAsync();
             }
 
-            public async Task DeleteAsync(Book book)
+            public async Task DeleteAsync(Book book, CancellationToken cancellationToken)
             {
                
                     Database.Set<Book>().Remove(book);
                     await Database.SaveChangesAsync();
                 
             }
-        public async Task<IEnumerable<Book>> GetBooksByAuthorAsync(int authorId)
+        public async Task<IEnumerable<Book>> GetBooksByAuthorAsync(int authorId, CancellationToken cancellationToken)
         {
             return await Database.Set<Book>()
                 .Where(book => book.AuthorId == authorId)

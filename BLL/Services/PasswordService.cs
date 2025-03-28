@@ -6,7 +6,7 @@ namespace BLL.Services
 {
     public class PasswordService
     {
-        public string HashPassword(string password)
+        public string HashPassword(string password, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(password))
             {
@@ -27,14 +27,14 @@ namespace BLL.Services
             }
         }
 
-        public bool VerifyPassword(string password, string storedHash)
+        public bool VerifyPassword(string password, string storedHash, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(password) || string.IsNullOrEmpty(storedHash))
             {
                 return false;
             }
 
-            string hashedPassword = HashPassword(password);
+            string hashedPassword = HashPassword(password, cancellationToken);
             return hashedPassword == storedHash;
         }
     }

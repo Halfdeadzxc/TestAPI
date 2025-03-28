@@ -21,57 +21,57 @@ using DAL.Models;
      
             }
 
-            public async Task<BookDTO> GetByIdAsync(int id)
+            public async Task<BookDTO> GetByIdAsync(int id, CancellationToken cancellationToken)
             {
-                var book = await _bookRepository.GetByIdAsync(id);
+                var book = await _bookRepository.GetByIdAsync(id, cancellationToken);
                 return _mapper.Map<BookDTO>(book);
             }
-            public async Task<BookDTO> GetByISBNAsync(string isbn)
+            public async Task<BookDTO> GetByISBNAsync(string isbn, CancellationToken cancellationToken)
             {
-                var book = await _bookRepository.GetByISBNAsync(isbn);
+                var book = await _bookRepository.GetByISBNAsync(isbn, cancellationToken);
                 return _mapper.Map<BookDTO>(book);
             }
-            public async Task<IEnumerable<BookDTO>> GetAllAsync()
+            public async Task<IEnumerable<BookDTO>> GetAllAsync(CancellationToken cancellationToken)
             {
-                var books = await _bookRepository.GetAllAsync();
+                var books = await _bookRepository.GetAllAsync(cancellationToken);
                 return _mapper.Map<IEnumerable<BookDTO>>(books);
             }
 
-            public async Task AddAsync(BookDTO bookDto)
+            public async Task AddAsync(BookDTO bookDto, CancellationToken cancellationToken)
             {
-                var existingBook = await _bookRepository.GetByISBNAsync(bookDto.ISBN);
+                var existingBook = await _bookRepository.GetByISBNAsync(bookDto.ISBN, cancellationToken);
                 if (existingBook != null)
                 {
                     throw new ArgumentException("A book with the same ISBN already exists.");
                 }
                 var book = _mapper.Map<Book>(bookDto);
-                await _bookRepository.AddAsync(book);
+                await _bookRepository.AddAsync(book, cancellationToken);
             }
 
-            public async Task UpdateAsync(BookDTO bookDto)
+            public async Task UpdateAsync(BookDTO bookDto, CancellationToken cancellationToken)
             {
-                var existingBook = await _bookRepository.GetByISBNAsync(bookDto.ISBN);
+                var existingBook = await _bookRepository.GetByISBNAsync(bookDto.ISBN, cancellationToken);
                 if (existingBook != null)
                 {
                     throw new ArgumentException("A book with the same ISBN already exists.");
                 }
                 var book = _mapper.Map<Book>(bookDto);
-                await _bookRepository.UpdateAsync(book);
+                await _bookRepository.UpdateAsync(book, cancellationToken);
             }
 
-            public async Task DeleteAsync(BookDTO bookDto)
+            public async Task DeleteAsync(BookDTO bookDto, CancellationToken cancellationToken)
             {
-                var findbook = await _bookRepository.GetByIdAsync(bookDto.Id);
+                var findbook = await _bookRepository.GetByIdAsync(bookDto.Id, cancellationToken);
                 if (findbook == null)
                 {
                     throw new ArgumentException("Book not found");
                 }
                 var book = _mapper.Map<Book>(bookDto);
-                await _bookRepository.DeleteAsync(book);
+                await _bookRepository.DeleteAsync(book, cancellationToken);
             }
         public async Task BorrowBookAsync(int bookId, int borrowerId, CancellationToken cancellationToken)
         {
-            var book = await _bookRepository.GetByIdAsync(bookId);
+            var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken);
             if (book == null)
             {
                 throw new ArgumentException("Book not found");
@@ -90,21 +90,21 @@ using DAL.Models;
             book.BorrowedTime = DateTime.Now;
             book.ReturnTime = DateTime.Now.AddDays(7); 
 
-            await _bookRepository.UpdateAsync(book);
+            await _bookRepository.UpdateAsync(book, cancellationToken);
         }
 
-        public async Task AddBookImageAsync(int bookId, byte[] imageData)
+        public async Task AddBookImageAsync(int bookId, byte[] imageData, CancellationToken cancellationToken)
             {
-                var book = await _bookRepository.GetByIdAsync(bookId);
+                var book = await _bookRepository.GetByIdAsync(bookId, cancellationToken);
                 if (book != null)
                 {
                     book.ImageData = imageData;
-                    await _bookRepository.UpdateAsync(book);
+                    await _bookRepository.UpdateAsync(book, cancellationToken);
                 }
             }
-            public async Task<IEnumerable<BookDTO>> GetBooksByAuthorAsync(int authorId)
+            public async Task<IEnumerable<BookDTO>> GetBooksByAuthorAsync(int authorId, CancellationToken cancellationToken)
             {
-                var books = await _bookRepository.GetBooksByAuthorAsync(authorId);
+                var books = await _bookRepository.GetBooksByAuthorAsync(authorId, cancellationToken);
                 return _mapper.Map<IEnumerable<BookDTO>>(books);
             }
         }

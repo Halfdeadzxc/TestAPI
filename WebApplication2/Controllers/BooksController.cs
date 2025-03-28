@@ -18,37 +18,37 @@ namespace WebApplication2.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
         {
-            var books = await _bookService.GetAllAsync();
+            var books = await _bookService.GetAllAsync(cancellationToken);
             return Ok(books); 
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
         {
-            var book = await _bookService.GetByIdAsync(id);
+            var book = await _bookService.GetByIdAsync(id, cancellationToken);
             return Ok(book); 
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add([FromBody] BookDTO bookDto)
+        public async Task<IActionResult> Add([FromBody] BookDTO bookDto, CancellationToken cancellationToken)
         {
-            await _bookService.AddAsync(bookDto);
+            await _bookService.AddAsync(bookDto, cancellationToken);
             return CreatedAtAction(nameof(GetById), new { id = bookDto.Id }, bookDto); 
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] BookDTO bookDto)
+        public async Task<IActionResult> Update(int id, [FromBody] BookDTO bookDto, CancellationToken cancellationToken)
         {
-            await _bookService.UpdateAsync(bookDto);
+            await _bookService.UpdateAsync(bookDto, cancellationToken);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, [FromBody] BookDTO bookDto)
+        public async Task<IActionResult> Delete(int id, [FromBody] BookDTO bookDto, CancellationToken cancellationToken)
         {
-            await _bookService.DeleteAsync(bookDto);
+            await _bookService.DeleteAsync(bookDto, cancellationToken);
             return NoContent(); 
         }
 

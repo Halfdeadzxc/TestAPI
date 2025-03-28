@@ -34,7 +34,7 @@ namespace UnitTests
 
                 var repository = new EFAuthorRepository(context);
 
-                var result = await repository.GetByIdAsync(1);
+                var result = await repository.GetByIdAsync(1, default);
 
                 Assert.NotNull(result);
                 Assert.Equal("John", result.FirstName);
@@ -58,7 +58,7 @@ namespace UnitTests
                     Country = "UK"
                 };
 
-                await repository.AddAsync(newAuthor);
+                await repository.AddAsync(newAuthor, default);
 
                 var authorInDb = context.Authors.FirstOrDefault(a => a.FirstName == "Jane" && a.LastName == "Smith");
                 Assert.NotNull(authorInDb);

@@ -22,7 +22,7 @@ public class UserService : IUserService
         cancellationToken.ThrowIfCancellationRequested();
 
         var user = await _userRepository.GetUserByUsernameAsync(username, cancellationToken);
-        if (user == null || !_passwordService.VerifyPassword(password, user.PasswordHash))
+        if (user == null || !_passwordService.VerifyPassword(password, user.PasswordHash, cancellationToken))
         {
             throw new UnauthorizedAccessException("Invalid credentials");
         }
@@ -34,7 +34,7 @@ public class UserService : IUserService
             new Claim(ClaimTypes.Role, user.Role)
         };
 
-        var accessToken = _jwtService.GenerateAccessToken(claims, 15);
+        var accessToken = _jwtService.GenerateAccessToken(claims, 15, cancellationToken);
         var refreshToken = _jwtService.GenerateRefreshToken(user.Id, cancellationToken);
         await _userRepository.AddRefreshTokenAsync(refreshToken, cancellationToken);
 
@@ -66,7 +66,7 @@ public class UserService : IUserService
             new Claim(ClaimTypes.Role, user.Role)
         };
 
-        return _jwtService.GenerateAccessToken(claims, 15);
+        return _jwtService.GenerateAccessToken(claims, 15, cancellationToken);
     }
     public async Task<UserDTO> CreateUserAsync(UserDTO userDto, CancellationToken cancellationToken)
     {
@@ -78,7 +78,7 @@ public class UserService : IUserService
             throw new ArgumentException("A user with the same username already exists.");
         }
 
-        var hashedPassword = _passwordService.HashPassword(userDto.PasswordHash);
+        var hashedPassword = _passwordService.HashPassword(userDto.PasswordHash, cancellationToken);
 
         var user = new User
         {

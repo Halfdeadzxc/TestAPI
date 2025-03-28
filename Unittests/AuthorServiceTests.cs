@@ -43,7 +43,7 @@ namespace UnitTests
                 var repository = new EFAuthorRepository(context);
                 var service = new AuthorService(repository, _mapper);
 
-                var author = await service.GetByIdAsync(1);
+                var author = await service.GetByIdAsync(1, default);
 
                 Assert.NotNull(author);
                 Assert.Equal("John", author.FirstName);
@@ -71,7 +71,7 @@ namespace UnitTests
                     Country = "UK"
                 };
 
-                await service.AddAsync(newAuthor);
+                await service.AddAsync(newAuthor,default);
 
                 var addedAuthor = context.Authors.FirstOrDefault();
                 Assert.NotNull(addedAuthor);
@@ -96,7 +96,7 @@ namespace UnitTests
                 var repository = new EFAuthorRepository(context);
                 var service = new AuthorService(repository, _mapper);
 
-                var authors = await service.GetAllAsync();
+                var authors = await service.GetAllAsync(default);
 
                 Assert.Equal(2, authors.Count());
             }
@@ -138,7 +138,7 @@ namespace UnitTests
                     await context.SaveChangesAsync();
                 }
 
-                var updatedAuthor = await repository.GetByIdAsync(1);
+                var updatedAuthor = await repository.GetByIdAsync(1, default);
                 Assert.NotNull(updatedAuthor);
                 Assert.Equal("UpdatedJohn", updatedAuthor.FirstName);
                 Assert.Equal("UpdatedDoe", updatedAuthor.LastName);
@@ -174,7 +174,7 @@ namespace UnitTests
                     await context.SaveChangesAsync();
                 }
 
-                var deletedAuthor = await repository.GetByIdAsync(1);
+                var deletedAuthor = await repository.GetByIdAsync(1, default);
                 Assert.Null(deletedAuthor);
             }
         }
